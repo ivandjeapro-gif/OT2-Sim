@@ -19,7 +19,7 @@
     --green: #22c55e;
     --yellow: #eab308;
     --blue: #3b82f6;
-    --sidebar-width: 100px;
+    --sidebar-width: 160px;
     --menu-height: 38px;
     --status-height: 32px;
 }
@@ -159,22 +159,25 @@ body {
 
 .sidebar-link {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 4px;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
     padding: 12px 8px;
     color: var(--text-secondary);
     text-decoration: none;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 11px;
+    font-size: 12px;
     position: relative;
 }
 
 .sidebar-link i {
     font-size: 20px;
-    width: 40px;
+    width: 34px;
     height: 32px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -224,12 +227,12 @@ body {
 }
 
 .sidebar-user {
-    padding: 12px 8px;
+    padding: 10px;
     border-top: 1px solid var(--border);
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 .user-avatar i {
@@ -240,8 +243,18 @@ body {
 .user-info {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: 1px;
+    min-width: 0;
+    flex: 1;
+}
+
+.user-name,
+.user-email {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .user-name {
@@ -331,31 +344,56 @@ body {
 }
 
 /* ===== PAGE: LIVE GRID ===== */
+/* Grille : Map 75% / KPI 25% en largeur, Filtres+Rendu dans la colonne droite */
 .live-grid {
-    display: flex;
+    display: grid;
+    grid-template-columns: 75% 25%;
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+        "carte  droite"
+        "kpi    droite";
     gap: 10px;
     height: 100%;
+    min-height: 0;
 }
 
+/* Ligne 1 : la Map (75% de la largeur) */
 .live-left {
+    grid-area: carte;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+
+/* La Map seule sur sa ligne, elle remplit la hauteur */
+.live-left > .panel-map {
     flex: 1;
+    min-height: 0;
+}
+
+/* Ligne 2 : les blocs KPI (20% de la hauteur) */
+.live-bottom {
+    grid-area: kpi;
+    min-width: 0;
+    min-height: 0;
+    max-height: 20vh;
+    display: flex;
+}
+
+.live-bottom > .panel-kpi { flex: 1; min-height: 0; }
+
+/* Colonne droite : Filtres + Rendu (20% de la largeur) */
+.live-right {
+    grid-area: droite;
     display: flex;
     flex-direction: column;
     gap: 10px;
     min-width: 0;
+    min-height: 0;
 }
 
-.live-right {
-    width: 260px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    flex-shrink: 0;
-}
-
-.panel-map { flex: 1; min-height: 0; }
-.panel-kpi { flex: 1; min-height: 0; }
-.panel-filters { flex: 1; min-height: 0; }
+.panel-filters { flex: 1 1 auto; min-height: 0; }
 .panel-rendu { flex: 0 0 auto; }
 
 #map {
@@ -787,7 +825,7 @@ body {
 
 /* MAP CONFIG SCROLLABLE */
 .map-config {
-    max-height: 420px;
+    max-height: 100%;
     overflow-y: auto;
     padding-right: 4px;
 }
@@ -1675,10 +1713,31 @@ body {
     z-index: 1050;
 }
 
+/* ===== RESPONSIVE: SIDEBAR REPLIEE (<=1440px) ===== */
+@media (max-width: 1440px) {
+    :root {
+        --sidebar-width: 100px;
+    }
+
+    .sidebar-link {
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+        font-size: 11px;
+    }
+
+    .sidebar-user {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .user-info { align-items: center; }
+}
+
 /* ===== RESPONSIVE: TABLETTE (<=1024px) ===== */
 @media (max-width: 1024px) {
-    .live-right {
-        width: 220px;
+    .live-grid {
+        grid-template-columns: 72% 28%;
     }
 
     .kpi-config-grid {
@@ -1781,12 +1840,26 @@ body {
         display: none;
     }
 
+    /* Sous 768px : tout s'empile en une seule colonne pleine largeur */
     .live-grid {
+        display: flex;
         flex-direction: column;
+        height: auto;
+    }
+
+    .live-left {
+        flex: none;
+        min-height: 400px;
+    }
+
+    .live-bottom {
+        max-height: none;
+        flex: none;
     }
 
     .live-right {
         width: 100%;
+        flex: none;
         flex-direction: row;
         flex-wrap: wrap;
     }
@@ -1794,10 +1867,6 @@ body {
     .live-right .panel {
         flex: 1 1 200px;
         min-width: 0;
-    }
-
-    .live-left {
-        min-height: 400px;
     }
 
     .settings-grid-5 {
@@ -1883,6 +1952,8 @@ body {
     .live-grid {
         gap: 6px;
     }
+
+    .live-bottom > .panel-kpi { min-height: 220px; }
 
     .live-right {
         flex-direction: column;

@@ -17,15 +17,15 @@
                     <i class="fas fa-broadcast-tower"></i>
                 </div>
             </div>
-            <div class="alert-banner" id="alertBanner">
+            <div class="alert-banner alert-mode" id="alertBanner">
                 <div class="alert-track" id="alertTrack">
-                    <span class="alert-text">Systeme operationnel - Tous engins connectes</span>
+                    <span class="alert-text danger">ATTENTION ATTENTION !!!!! 3 DT (DT-01, DT-02, DT-03) ont fait une sortie de route.</span>
                 </div>
             </div>
             <div class="header-right">
-                <div class="notification-bell" id="notificationBell">
+                <div class="notification-bell active" id="notificationBell">
                     <i class="fas fa-bell"></i>
-                    <span class="bell-badge hidden" id="bellBadge">0</span>
+                    <span class="bell-badge" id="bellBadge">1</span>
                 </div>
             </div>
         </header>
@@ -133,61 +133,6 @@
                     <div class="voyant-bar" id="voyantMO"></div>
                 </div>
 
-                <!-- ENVIRONNEMENT -->
-                <div class="env-block">
-                    <div class="env-header">
-                        <i class="fas fa-leaf"></i>
-                        <span>Environnement</span>
-                    </div>
-                    <div class="env-grid">
-                        <div class="env-card">
-                            <div class="env-icon env-icon-temp">
-                                <i class="fas fa-thermometer-half"></i>
-                            </div>
-                            <div class="env-info">
-                                <span class="env-label">Temperature</span>
-                                <span class="env-val" id="envTemp">--</span>
-                            </div>
-                        </div>
-                        <div class="env-card">
-                            <div class="env-icon env-icon-humid">
-                                <i class="fas fa-tint"></i>
-                            </div>
-                            <div class="env-info">
-                                <span class="env-label">Humidite</span>
-                                <span class="env-val" id="envHumid">--</span>
-                            </div>
-                        </div>
-                        <div class="env-card">
-                            <div class="env-icon env-icon-rain">
-                                <i class="fas fa-cloud-rain"></i>
-                            </div>
-                            <div class="env-info">
-                                <span class="env-label">Pluviometrie</span>
-                                <span class="env-val" id="envRain">--</span>
-                            </div>
-                        </div>
-                        <div class="env-card">
-                            <div class="env-icon env-icon-noise">
-                                <i class="fas fa-volume-up"></i>
-                            </div>
-                            <div class="env-info">
-                                <span class="env-label">Niveau sonore</span>
-                                <span class="env-val" id="envNoise">--</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="voyant-bar" id="voyantEnv"></div>
-                </div>
-
-                <!-- RESERVOIRS EN ALERTE -->
-                <div class="grade-block" id="fuelBlock">
-                    <h3 class="grade-title c-red">Reservoirs <span class="fuel-badge" id="fuelAlertCount">0</span></h3>
-                    <div class="fuel-alert-list" id="fuelAlertList">
-                        <div class="fuel-no-alert">Aucun reservoir en alerte</div>
-                    </div>
-                    <div class="voyant-bar" id="voyantFuel"></div>
-                </div>
             </aside>
         </div>
     </div>

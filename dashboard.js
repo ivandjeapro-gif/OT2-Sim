@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
         minerais: { current: 53500, planned: 55000, target: 58000 },
         ore: { current: 1500, planned: 1600, target: 1800 },
         waste: { current: 26000, planned: 25000, target: 24000 },
-        offroad: { count: 0, max: 8 },
+        offroad: { count: 3, max: 8 },
         fuel: {
             DT01: { tank: 300, level: 72, consumption: 25 },
             DT02: { tank: 300, level: 45, consumption: 25 },
@@ -25,16 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ALERTS POOL (metier)
     const alerts = [
-        { text: 'DT-03: Mauvais chemin - pas le bon trail vers ROM Pad 1', type: 'danger', cat: 'chemin' },
-        { text: 'DT-01: Offroad detecte hors piste autorisee', type: 'danger', cat: 'offroad' },
-        { text: 'DT-03: Niveau carburant bas - 12%', type: 'warn', cat: 'carburant' },
-        { text: 'Temperature atmospherique elevee - 42 C', type: 'danger', cat: 'meteo' },
-        { text: 'Humidite elevee - 85% - Piste glissante', type: 'warn', cat: 'meteo' },
-        { text: 'Grade 24h: High Grade -15% vs Planned', type: 'warn', cat: 'grade' },
-        { text: 'DT-02: Dumping non conforme - mauvais Rompad', type: 'danger', cat: 'chemin' },
-        { text: 'DT-05: Offroad - zone non autorisee', type: 'warn', cat: 'offroad' },
-        { text: 'Temperature basse - 8 C - Risque de gel', type: 'warn', cat: 'meteo' },
-        { text: 'DT-04: Carburant critique - 8%', type: 'danger', cat: 'carburant' },
+        { text: 'ATTENTION ATTENTION !!!!! 3 DT (DT-01, DT-02, DT-03) ont fait une sortie de route.', type: 'danger', cat: 'offroad' }
     ];
 
     let alertIndex = 0;
@@ -131,47 +122,14 @@ document.addEventListener('DOMContentLoaded', () => {
         el.className = 'voyant-bar ' + (ratio > 0.15 ? 'danger' : ratio > 0.08 ? 'warning' : '');
     }
 
-    // ===== ENVIRONNEMENT =====
+    // ===== ENVIRONNEMENT (bloc supprime) =====
     function renderEnvironment() {
-        const e = data.env, th = data.envThresholds;
-
-        document.getElementById('envTemp').textContent = e.temperature.toFixed(1) + '\u00B0C';
-        document.getElementById('envHumid').textContent = Math.round(e.humidity) + '%';
-        document.getElementById('envRain').textContent = e.rainfall.toFixed(1) + 'mm';
-        document.getElementById('envNoise').textContent = Math.round(e.noise) + ' dB';
-
-        const tempLvl = e.temperature >= th.tempHigh ? 2 : e.temperature >= th.tempWarn ? 1 : 0;
-        const humLvl = e.humidity >= th.humidityHigh ? 2 : e.humidity >= th.humidityWarn ? 1 : 0;
-        const rainLvl = e.rainfall >= th.rainDanger ? 2 : e.rainfall >= th.rainWarn ? 1 : 0;
-        const noiseLvl = e.noise >= th.noiseHigh ? 2 : e.noise >= th.noiseWarn ? 1 : 0;
-        const worst = Math.max(tempLvl, humLvl, rainLvl, noiseLvl);
-
-        const el = document.getElementById('voyantEnv');
-        if (el) el.className = 'voyant-bar ' + (worst === 2 ? 'danger' : worst === 1 ? 'warning' : '');
+        // Le panneau Environnement a ete retire de l'interface.
     }
 
+    // ===== RESERVOIRS (bloc supprime) =====
     function renderFuelAlerts() {
-        const list = document.getElementById('fuelAlertList');
-        const badge = document.getElementById('fuelAlertCount');
-        if (!list || !badge) return;
-
-        const alerts = (data.vehicles || [])
-            .filter(v => v.fuel < data.fuelThreshold)
-            .sort((a, b) => a.fuel - b.fuel);
-
-        badge.textContent = alerts.length;
-        badge.classList.toggle('ok', alerts.length === 0);
-
-        if (!alerts.length) {
-            list.innerHTML = '<div class="fuel-no-alert">Aucun reservoir en alerte</div>';
-        } else {
-            list.innerHTML = alerts
-                .map(v => `<div class="fuel-alert-item"><span class="fuel-dt">${v.id}</span><span class="fuel-pct">${Math.round(v.fuel)}%</span></div>`)
-                .join('');
-        }
-
-        const el = document.getElementById('voyantFuel');
-        if (el) el.className = 'voyant-bar ' + (alerts.length ? 'danger' : '');
+        // Le panneau Reservoirs a ete retire de l'interface.
     }
 
     // ===== KPI CARD ALERT STATE =====
@@ -192,21 +150,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== ALERT TICKER =====
     function cycleAlert() {
         const track = document.getElementById('alertTrack');
-        const alert = alerts[alertIndex % alerts.length];
-
-        track.innerHTML = `<span class="alert-text ${alert.type}">${alert.text}</span>`;
-        alertIndex++;
-
-        // Activate bell
+        const banner = document.getElementById('alertBanner');
         const bell = document.getElementById('notificationBell');
         const badge = document.getElementById('bellBadge');
+
+        // Lire si l'affichage des alertes est active dans la config
+        let config = null;
+        try { config = JSON.parse(localStorage.getItem('oreTrackingConfig')); } catch(e) {}
+        const showAlerts = config && typeof config.showAlerts === 'boolean' ? config.showAlerts : true;
+
+        if (!showAlerts) {
+            banner.style.display = 'none';
+            if (bell) bell.style.display = 'none';
+            return;
+        }
+
+        banner.style.display = '';
+        if (bell) bell.style.display = '';
+
+        const alert = alerts[0];
+
+        // Mode alerte permanent : fond rouge + texte blanc gras + cloche qui remue
+        banner.classList.add('alert-mode');
+
+        track.innerHTML = `<span class="alert-text danger">${alert.text}</span>`;
+
+        // Activate bell
         bell.classList.add('active');
         badge.classList.remove('hidden');
-        badge.textContent = alertIndex;
-
-        setTimeout(() => {
-            bell.classList.remove('active');
-        }, 3000);
+        badge.textContent = '1';
     }
 
     // ===== SIMULATE DATA CHANGES =====
@@ -226,24 +198,20 @@ document.addEventListener('DOMContentLoaded', () => {
         data.grades.low.actuel += Math.round((Math.random() - 0.45) * 30);
         data.grades.marginal.actuel += Math.round((Math.random() - 0.45) * 20);
 
-        // Offroad count (tends to be 0-2, rarely higher)
-        if (Math.random() > 0.85) {
-            data.offroad.count = Math.max(0, Math.min(3, data.offroad.count + (Math.random() > 0.4 ? 1 : -1)));
-        }
+        // Offroad count (3 DTs en offroad permanents selon l'alerte)
+        data.offroad.count = Math.max(3, data.offroad.count);
 
         // Environnement
         data.env.temperature = Math.max(0, data.env.temperature + (Math.random() - 0.5) * 2);
         data.env.humidity = Math.max(0, Math.min(100, data.env.humidity + (Math.random() - 0.5) * 4));
         data.env.rainfall = Math.max(0, data.env.rainfall + (Math.random() - 0.75) * 2);
         data.env.noise = Math.max(40, Math.min(110, data.env.noise + (Math.random() - 0.5) * 6));
-        renderEnvironment();
 
         // Reservoirs (consommation, ravitaillement quand vide)
         data.vehicles.forEach(v => {
             v.fuel = Math.max(0, v.fuel - Math.random() * 0.6);
             if (v.fuel < 2) v.fuel = 80 + Math.random() * 15;
         });
-        renderFuelAlerts();
 
         // Update DOM - KPIs
         animateValue(document.getElementById('kpiMinerais'),
@@ -490,18 +458,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!trails.length) return map;
 
-        // VEHICLES - 1 DT par trail
+        // VEHICLES - STRICTEMENT 4 DT AU TOTAL
+        const maxVehicles = 4;
         const vehicles = [];
-        let dtNum = 0;
-        trails.forEach((t, ti) => {
-            dtNum++;
-            vehicles.push({ id: 'DT-' + String(dtNum).padStart(2, '0'), online: true, trailIdx: ti, start: 0.1, dir: 1 });
-        });
+        for (let i = 1; i <= maxVehicles; i++) {
+            const trailIdx = (i - 1) % trails.length;
+            vehicles.push({
+                id: 'DT-' + String(i).padStart(2, '0'),
+                online: true,
+                trailIdx: trailIdx,
+                start: 0.15 + (i * 0.2) % 0.7,
+                dir: i % 2 === 0 ? -1 : 1
+            });
+        }
 
-        // Niveaux de carburant par DT (reservoirs) - max 3
-        const fuelLevels = [72, 45, 12];
-        data.vehicles = vehicles.slice(0, 3).map((v, idx) => ({ id: v.id, fuel: fuelLevels[idx % fuelLevels.length] }));
-        renderFuelAlerts();
+        // Niveaux de carburant par DT (reservoirs)
+        const fuelLevels = [72, 45, 12, 60];
+        data.vehicles = vehicles.map((v, idx) => ({ id: v.id, fuel: fuelLevels[idx % fuelLevels.length] }));
 
         const vehicleState = {};
         const vehicleMarkers = {};
@@ -522,31 +495,35 @@ document.addEventListener('DOMContentLoaded', () => {
             const trail = trails[v.trailIdx % trails.length];
             const startPos = pointAt(trail.waypoints, v.start);
 
+            const isOffroad = (v.id === 'DT-01' || v.id === 'DT-02' || v.id === 'DT-03');
+
             const icon = L.divIcon({
-                className: 'zone-marker',
-                html: `<img src="assets/icon DT.png" class="dt-icon" data-dir="${v.dir}" style="width:24px;height:24px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));transform:scaleX(${v.dir === -1 ? -1 : 1});" />`,
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
+                className: 'zone-marker dt-marker-container',
+                html: `
+                    <div class="dt-floating-label ${isOffroad ? 'dt-alert-offroad' : ''}">${v.id}</div>
+                    <img src="assets/icon DT.png" class="dt-icon ${isOffroad ? 'dt-icon-offroad' : ''}" data-dir="${v.dir}" style="width:26px;height:26px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));transform:scaleX(${v.dir === -1 ? -1 : 1});display:block;" />
+                `,
+                iconSize: [26, 26],
+                iconAnchor: [13, 13]
             });
-            const marker = L.marker([startPos[0], startPos[1]], { icon }).addTo(map);
-            marker.bindTooltip(v.id, {
-                permanent: showLabels,
-                direction: 'top',
-                offset: [0, -12],
-                className: 'vehicle-tooltip'
-            });
+            const marker = L.marker([startPos[0], startPos[1]], { icon, zIndexOffset: isOffroad ? 1000 : 500 }).addTo(map);
             vehicleMarkers[v.id] = marker;
+
+            // Décalage perpendiculaire permanent pour les DT en infraction : ils roulent hors piste (offroad)
+            const offroadOffset = isOffroad ? 0.0018 : 0; // ~200m hors de la piste
 
             vehicleState[v.id] = {
                 trail,
                 progress: v.start,
                 direction: v.dir,
                 step: baseSpeed / Math.max(trailLength(trail.waypoints), 0.001),
-                lastPos: startPos
+                lastPos: startPos,
+                isOffroad,
+                offroadOffset
             };
         });
 
-        // ANIMATE: advance along the SAME waypoints, bounce at each end (aller-retour)
+        // ANIMATE: advance along waypoints (DTs en infraction décalés hors piste)
         const moveTimer = setInterval(() => {
             vehicles.forEach(v => {
                 const st = vehicleState[v.id];
@@ -555,7 +532,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (st.progress >= 1) { st.progress = 1; st.direction = -1; }
                 else if (st.progress <= 0) { st.progress = 0; st.direction = 1; }
 
-                const pos = pointAt(st.trail.waypoints, st.progress);
+                const basePos = pointAt(st.trail.waypoints, st.progress);
+                // Si offroad : décaler latéralement par rapport à la piste
+                const pos = st.isOffroad
+                    ? [basePos[0] + st.offroadOffset, basePos[1] + st.offroadOffset * 0.8]
+                    : basePos;
+
                 vehicleMarkers[v.id].setLatLng([pos[0], pos[1]]);
 
                 // Symetrie horizontale selon le sens de deplacement (pas de rotation)
@@ -629,9 +611,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Data update every 3s
     setInterval(simulateDataChange, 3000);
 
-    // Alert cycle every 6s
-    setInterval(cycleAlert, 6000);
-
-    // First alert after 2s
-    setTimeout(cycleAlert, 2000);
+    // Alert cycle: immediate on load
+    cycleAlert();
 });

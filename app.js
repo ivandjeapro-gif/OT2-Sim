@@ -1564,6 +1564,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showZones: document.getElementById('cfgShowZones').checked,
             showTrails: document.getElementById('cfgShowTrails').checked,
             showLabels: document.getElementById('cfgShowLabels').checked,
+            showAlerts: document.getElementById('cfgShowAlerts') ? document.getElementById('cfgShowAlerts').checked : true,
             basemap: basemapVal,
             mbtilesUrl: document.getElementById('cfgMbtilesUrl').value,
             layers: layers

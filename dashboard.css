@@ -63,11 +63,12 @@ body {
     50% { opacity: 0.55; box-shadow: 0 0 16px rgba(239,68,68,0.5); }
 }
 
-.signal-icon.offline {
-    background: rgba(100, 116, 139, 0.15);
-    border-color: rgba(100, 116, 139, 0.3);
-    color: var(--muted);
-    animation: none;
+.signal-icon i {
+    display: inline-block;
+}
+
+.header:has(.alert-banner.alert-mode) .signal-icon i {
+    animation: bellShake 0.5s ease-in-out infinite;
 }
 
 /* ALERT BANNER */
@@ -101,6 +102,29 @@ body {
 .alert-text.warn { color: var(--yellow); }
 .alert-text.danger { color: var(--red); }
 
+/* MODE ALERTE : le bandeau entier devient rouge */
+.alert-banner.alert-mode {
+    background: var(--red);
+    border-color: var(--red);
+}
+
+.alert-banner.alert-mode .alert-text,
+.alert-banner.alert-mode .alert-text.warn,
+.alert-banner.alert-mode .alert-text.danger {
+    color: #fff;
+    font-weight: 700;
+}
+
+
+
+@keyframes bellShake {
+    0%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(-15deg); }
+    40% { transform: rotate(12deg); }
+    60% { transform: rotate(-10deg); }
+    80% { transform: rotate(8deg); }
+}
+
 @keyframes scrollAlert {
     0% { transform: translateX(0); }
     100% { transform: translateX(-100%); }
@@ -124,16 +148,13 @@ body {
 .notification-bell:hover { background: rgba(255,255,255,0.06); }
 .notification-bell i { font-size: 18px; color: var(--gold); }
 
-.notification-bell.active i {
+.notification-bell.active i,
+.alert-banner.alert-mode ~ .header-right .notification-bell i {
     color: var(--red);
-    animation: bellShake 0.4s ease-in-out infinite;
+    animation: bellShake 0.5s ease-in-out infinite;
 }
 
-@keyframes bellShake {
-    0%, 100% { transform: rotate(0); }
-    25% { transform: rotate(12deg); }
-    75% { transform: rotate(-12deg); }
-}
+
 
 .bell-badge {
     position: absolute;
@@ -233,17 +254,18 @@ body {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 6px rgba(34,197,94,0.6);
+    display: none; /* pas de point vert en etat normal */
 }
 
 .kpi-voyant.warning {
+    display: block;
     background: var(--yellow);
     box-shadow: 0 0 8px rgba(234,179,8,0.6);
     animation: voyantBlink 1s ease-in-out infinite;
 }
 
 .kpi-voyant.danger {
+    display: block;
     background: var(--red);
     box-shadow: 0 0 10px rgba(239,68,68,0.6);
     animation: voyantBlink 0.5s ease-in-out infinite;
@@ -278,7 +300,7 @@ body {
     min-height: 0;
 }
 
-#map { width: 100%; height: 100%; min-height: 300px; z-index: 1; }
+#map { width: 100%; height: 100%; min-height: 0; z-index: 1; }
 .leaflet-control-zoom { display: none !important; }
 
 .map-controls {
@@ -345,14 +367,14 @@ body {
 
 /* ===== SIDEBAR ===== */
 .sidebar {
-    width: 300px;
+    flex: 0 0 25%;
+    max-width: 25%;
     margin-left: 12px;
     display: flex;
     flex-direction: column;
     gap: 10px;
     overflow-y: auto;
     min-height: 0;
-    flex: 0 1 auto;
     padding-right: 4px;
 }
 
@@ -367,6 +389,11 @@ body {
     border-radius: 8px;
     padding: 10px 14px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1 1 0;
+    min-height: 64px;
 }
 
 .offroad-card.alert-state {
@@ -398,7 +425,16 @@ body {
     padding: 8px 10px;
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1 1 0;
+    min-height: 78px;
 }
+
+.grade-title { flex-shrink: 0; }
+.grade-row { flex: 1; align-items: center; }
+.voyant-bar { flex-shrink: 0; }
 
 .grade-title {
     text-align: center;
@@ -647,14 +683,126 @@ body {
     50% { opacity: 0.55; box-shadow: 0 0 18px rgba(251,191,36,1); }
 }
 
+/* ===== DT FLOATING LABELS & MARKERS ===== */
+.zone-marker.dt-marker-container {
+    background: none !important;
+    border: none !important;
+    position: relative !important;
+    overflow: visible !important;
+}
+
+.dt-floating-label {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 6px;
+    background: rgba(13, 21, 37, 0.95);
+    color: #e2e8f0;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid #243553;
+    white-space: nowrap;
+    pointer-events: none;
+    line-height: 1.2;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+    user-select: none;
+    z-index: 10;
+}
+
+/* DT EN ALERTE OFFROAD : CADRE ROUGE, ECRITURE BLANC ET GRAS */
+.dt-floating-label.dt-alert-offroad {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    font-weight: 900 !important;
+    font-size: 12px !important;
+    letter-spacing: 0.5px;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 0 14px rgba(239, 68, 68, 1), 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+    animation: dtLabelRedPulse 0.6s ease-in-out infinite !important;
+    z-index: 9999;
+}
+
+/* Petite pointe vers le DT */
+.dt-floating-label.dt-alert-offroad::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #ffffff transparent transparent transparent;
+}
+
+@keyframes dtLabelRedPulse {
+    0%, 100% {
+        transform: translateX(-50%) scale(1);
+        box-shadow: 0 0 14px rgba(239, 68, 68, 1), 0 0 24px rgba(239, 68, 68, 0.8);
+    }
+    50% {
+        transform: translateX(-50%) scale(1.12);
+        box-shadow: 0 0 6px rgba(239, 68, 68, 0.6), 0 0 10px rgba(239, 68, 68, 0.4);
+    }
+}
+
 .vehicle-tooltip {
     background: rgba(13, 21, 37, 0.95) !important;
     border: 1px solid #243553 !important;
     color: #e2e8f0 !important;
-    font-size: 10px !important;
-    font-weight: 600 !important;
-    padding: 2px 8px !important;
-    border-radius: 3px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 3px 8px !important;
+    border-radius: 4px !important;
+    white-space: nowrap !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* DT EN ALERTE OFFROAD : CADRE ROUGE, ECRITURE BLANC ET GRAS */
+.vehicle-tooltip.dt-alert-offroad {
+    background: #ef4444 !important;
+    border: 2px solid #ffffff !important;
+    color: #ffffff !important;
+    font-weight: 900 !important;
+    font-size: 12px !important;
+    letter-spacing: 0.5px !important;
+    box-shadow: 0 0 14px rgba(239, 68, 68, 1), 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+    animation: dtTooltipBlink 0.6s ease-in-out infinite !important;
+    z-index: 9999 !important;
+}
+
+.vehicle-tooltip.dt-alert-offroad::before {
+    border-top-color: #ef4444 !important;
+}
+
+@keyframes dtTooltipBlink {
+    0%, 100% {
+        opacity: 1;
+        background: #ef4444 !important;
+        border-color: #ffffff !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 14px rgba(239, 68, 68, 1), 0 0 24px rgba(239, 68, 68, 0.8) !important;
+    }
+    50% {
+        opacity: 0.85;
+        background: #b91c1c !important;
+        border-color: #ffffff !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 6px rgba(239, 68, 68, 0.6) !important;
+    }
+}
+
+/* ICONE DU DT EN OFFROAD (pulsation rouge) */
+.dt-icon-offroad {
+    animation: dtIconOffroadBlink 0.6s ease-in-out infinite !important;
+    filter: drop-shadow(0 0 8px #ef4444) drop-shadow(0 0 14px #ef4444) !important;
+}
+
+@keyframes dtIconOffroadBlink {
+    0%, 100% { filter: drop-shadow(0 0 10px #ef4444) drop-shadow(0 0 16px #ef4444); transform: scale(1); }
+    50% { filter: drop-shadow(0 0 3px #ef4444); transform: scale(1.2); }
 }
 
 .leaflet-tooltip-top::before { border-top-color: rgba(13,21,37,0.95) !important; }
